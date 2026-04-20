@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디에스오토 매입부 1회차</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B2A47;--navy2:#243352;--navy3:#2E4070;
+  --blue:#3B82F6;--blue-light:#60A5FA;
+  --mint:#10B981;--orange:#F59E0B;--red:#EF4444;--purple:#8B5CF6;
+  --bg:#F1F5F9;--surface:#fff;--border:#E2E8F0;
+  --text:#1E293B;--muted:#64748B;--muted2:#94A3B8;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:13px}
+
+/* ── SIDEBAR ── */
+.sidebar{width:200px;min-height:100vh;background:var(--navy);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
+.sb-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.sb-logo-title{color:#fff;font-size:15px;font-weight:900;letter-spacing:-0.5px}
+.sb-logo-title span{color:var(--blue-light)}
+.sb-logo-sub{color:rgba(255,255,255,0.4);font-size:10px;margin-top:2px;font-family:'DM Mono',monospace}
+.sb-sync{color:rgba(255,255,255,0.5);font-size:10px;font-family:'DM Mono',monospace;padding:6px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
+
+.sb-section{padding:12px 10px 4px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.sb-menu{list-style:none;padding:0 8px;margin-bottom:8px}
+.sb-menu li a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;text-decoration:none}
+.sb-menu li a:hover{background:rgba(255,255,255,0.08);color:#fff}
+.sb-menu li a.on{background:var(--blue);color:#fff}
+.sb-menu li a .ico{width:16px;height:16px;opacity:0.7;flex-shrink:0}
+.sb-menu li a.on .ico{opacity:1}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px}
+.sb-badge.mint{background:var(--mint)}
+
+.sb-assignees{padding:8px;border-top:1px solid rgba(255,255,255,0.08);margin-top:auto}
+.sb-assignees-title{font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0 8px 6px}
+.sb-person{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;transition:all 0.15s}
+.sb-person:hover{background:rgba(255,255,255,0.06)}
+.sb-person.on{background:rgba(255,255,255,0.1)}
+.sb-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-person-info{flex:1;min-width:0}
+.sb-person-name{font-size:11px;color:#fff;font-weight:500}
+.sb-person-cnt{font-size:10px;color:rgba(255,255,255,0.4);font-family:'DM Mono',monospace}
+
+/* ── MAIN ── */
+.main{margin-left:200px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* Top bar */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-tabs{display:flex;gap:0}
+.ttab{padding:0 16px;height:52px;display:flex;align-items:center;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
+.ttab:hover{color:var(--text)}
+.ttab.on{color:var(--blue);border-bottom:2px solid var(--blue);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.tb-date{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.tb-dday{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px}
+.tb-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;color:var(--muted);transition:all 0.15s}
+.tb-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Content */
+.content{padding:20px 24px;flex:1}
+.pane{display:none}.pane.on{display:block}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}}
+.kpi{background:#fff;border-radius:10px;padding:16px;border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer;transition:all 0.15s}
+.kpi:hover{border-color:var(--blue-light);box-shadow:0 4px 12px rgba(59,130,246,0.08)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.kpi-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.kpi-trend{font-size:10px;font-family:'DM Mono',monospace;font-weight:700;padding:2px 6px;border-radius:4px}
+.kpi-trend.up{background:#D1FAE5;color:#065F46}
+.kpi-trend.down{background:#FEE2E2;color:#991B1B}
+.kpi-trend.neu{background:#F1F5F9;color:var(--muted)}
+.kpi-val{font-size:26px;font-weight:900;color:var(--text);line-height:1;font-family:'DM Mono',monospace}
+.kpi-val span{font-size:13px;font-weight:400;color:var(--muted);margin-left:2px;font-family:'Noto Sans KR',sans-serif}
+.kpi-lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-bar{height:3px;background:var(--bg);border-radius:2px;margin-top:10px;overflow:hidden}
+.kpi-fill{height:100%;border-radius:2px;transition:width 0.5s}
+
+/* ── DASHBOARD GRID ── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr 280px;gap:14px}
+@media(max-width:1200px){.dash-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.dash-grid{grid-template-columns:1fr}}
+
+.panel{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.panel-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:12px;font-weight:700;color:var(--text)}
+.panel-sub{font-size:10px;color:var(--muted)}
+.panel-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:#fff;font-size:10px;cursor:pointer;color:var(--muted);font-family:'Noto Sans KR',sans-serif}
+.panel-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* 차종별 진행 */
+.car-list{padding:8px 0}
+.car-item{padding:7px 16px;display:flex;align-items:center;gap:10px;transition:background 0.1s}
+.car-item:hover{background:var(--bg)}
+.car-name{font-size:12px;font-weight:500;min-width:90px;color:var(--text)}
+.car-bar-wrap{flex:1}
+.car-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.car-fill{height:100%;border-radius:3px;transition:width 0.5s}
+.car-cnt{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);min-width:40px;text-align:right}
+.car-pct{font-size:10px;font-family:'DM Mono',monospace;min-width:32px;text-align:right}
+
+/* 담당자 달성률 */
+.assignee-list{padding:8px 0}
+.ass-item{padding:8px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.1s}
+.ass-item:hover{background:var(--bg)}
+.ass-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.ass-info{flex:1;min-width:0}
+.ass-name{font-size:12px;font-weight:700;color:var(--text)}
+.ass-bar{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:4px}
+.ass-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.ass-right{text-align:right}
+.ass-cnt{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text)}
+.ass-pct{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+
+/* 오른쪽 패널들 */
+.right-panels{display:flex;flex-direction:column;gap:14px}
+
+/* 기준가 초과 */
+.overflow-panel{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.overflow-item{padding:8px 14px;border-bottom:1px solid #FEF2F2;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background 0.1s}
+.overflow-item:hover{background:#FEF2F2}
+.overflow-item:last-child{border-bottom:none}
+.ov-no{font-size:11px;font-weight:700;color:var(--blue);font-family:'DM Mono',monospace;text-decoration:underline}
+.ov-over{font-size:11px;font-weight:700;color:var(--red);font-family:'DM Mono',monospace;margin-left:auto}
+.ov-info{font-size:10px;color:var(--muted)}
+
+/* 로그 */
+.log-item{padding:6px 14px;border-bottom:1px solid var(--bg);font-size:11px;color:var(--muted);display:flex;gap:8px}
+.log-item:last-child{border-bottom:none}
+.log-time{font-family:'DM Mono',monospace;color:var(--muted2);white-space:nowrap;font-size:10px}
+.log-list{max-height:150px;overflow-y:auto}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:#F8FAFC;padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
+tbody tr{border-bottom:1px solid #F8FAFC;transition:background 0.1s;}
+tbody tr:hover{background:#F8FAFC}
+tbody td{padding:8px 12px;vertical-align:middle;white-space:nowrap}
+th.r,td.r{text-align:right}
+th.c,td.c{text-align:center}
+
+/* Badge */
+.bdg{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap}
+.bdg-hyeong{background:#DBEAFE;color:#1E40AF}
+.bdg-han{background:#D1FAE5;color:#065F46}
+.bdg-jang{background:#FEF3C7;color:#92400E}
+.bdg-lee{background:#EDE9FE;color:#5B21B6}
+.bdg-jung{background:#FFE4E6;color:#9F1239}
+.bdg-red{background:#FEE2E2;color:#991B1B}
+.bdg-green{background:#D1FAE5;color:#065F46}
+.bdg-blue{background:#DBEAFE;color:#1E40AF}
+.bdg-amber{background:#FEF3C7;color:#92400E}
+.bdg-gray{background:#F1F5F9;color:var(--muted)}
+
+/* Numbers */
+.num{font-family:'DM Mono',monospace}
+.pos{color:var(--mint);font-weight:700;font-family:'DM Mono',monospace}
+.neg{color:var(--red);font-weight:700;font-family:'DM Mono',monospace}
+.carno-link{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;font-family:'DM Mono',monospace}
+.carno-link:hover{color:var(--navy)}
+.day-bdg{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
+
+/* Progress */
+.prog-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.4s}
+.prog-txt{font-size:10px;margin-top:2px;font-family:'DM Mono',monospace;color:var(--muted)}
+
+/* ── FORM (입고등록) ── */
+.form-card{background:#fff;border-radius:10px;border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+.form-card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);background:#F8FAFC;display:flex;align-items:center;justify-content:space-between}
+.form-card-title{font-size:12px;font-weight:700;color:var(--text)}
+.form-body{padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+input.fi,select.fi,textarea.fi{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#fff;color:var(--text);transition:border-color 0.15s}
+input.fi:focus,select.fi:focus,textarea.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+.price-warn{display:none;background:#FEE2E2;border-left:3px solid var(--red);padding:8px 14px;font-size:11px;color:#991B1B;font-weight:700}
+.price-warn.on{display:block}
+.reason-wrap{display:none;padding:10px 16px;background:#FFF5F5;border-top:1px solid #FEE2E2}
+.reason-wrap.on{display:block}
+.reason-wrap label{font-size:11px;color:var(--red);font-weight:700;display:block;margin-bottom:4px}
+textarea.fi{resize:vertical;min-height:48px}
+.dup-warn{display:none;background:#FFFBEB;border:1px solid #FDE68A;border-radius:5px;padding:5px 10px;font-size:11px;color:#92400E;font-weight:700;margin-top:3px}
+.dup-warn.on{display:block}
+
+/* Buttons */
+.btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;white-space:nowrap;color:var(--text)}
+.btn:hover{background:var(--bg)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:#2563EB}
+.btn-danger{border-color:var(--red);color:var(--red)}
+.btn-danger:hover{background:#FEE2E2}
+.btn-edit{border-color:var(--blue);color:var(--blue)}
+.btn-edit:hover{background:#EFF6FF}
+.btn-sm{padding:3px 9px;font-size:10px;border-radius:4px}
+
+/* 담당자 상세 */
+.p-top{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--border);margin-bottom:14px;background:#fff;border-radius:10px;border:1px solid var(--border)}
+.p-avatar-big{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.p-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:700px){.p-kpi-row{grid-template-columns:repeat(2,1fr)}}
+
+/* two-col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.mini-box{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.mini-hdr{padding:8px 14px;background:#F8FAFC;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text)}
+.mini-row{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;border-bottom:1px solid var(--bg);font-size:12px}
+.mini-row:last-child{border-bottom:none}
+.mini-val{font-family:'DM Mono',monospace;font-weight:700;color:var(--blue)}
+
+/* Filters */
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filters input,.filters select{padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#fff;color:var(--text)}
+.filters input:focus,.filters select:focus{border-color:var(--blue)}
+
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:500;align-items:center;justify-content:center;pointer-events:none}
+.modal-bg.on{display:flex;pointer-events:auto}
+.modal{background:#fff;border-radius:12px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
+.modal-hdr{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#F8FAFC}
+.modal-title{font-size:14px;font-weight:700;color:var(--text)}
+.modal-close{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-row.full{grid-template-columns:1fr}
+.mfg{display:flex;flex-direction:column;gap:4px}
+.mfg label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.mfg input,.mfg select,.mfg textarea{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;color:var(--text)}
+.mfg input:focus,.mfg select:focus,.mfg textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+.modal-margin{padding:10px 14px;background:#F0F9FF;border-radius:8px;border:1px solid #BAE6FD;display:flex;align-items:center;justify-content:space-between}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.sold-row{display:flex;align-items:center;gap:8px}
+.sold-row label{font-size:13px;cursor:pointer}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+
+/* 상세 모달 */
+.detail-modal{background:#fff;border-radius:12px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.2)}
+.detail-section{padding:14px 20px;border-bottom:1px solid var(--border)}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #F8FAFC}
+.detail-row:last-child{border-bottom:none}
+.detail-lbl{font-size:11px;color:var(--muted);min-width:80px}
+.detail-val{font-size:12px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;text-align:right;flex:1}
+.reason-box{background:#FEE2E2;border:1px solid #FECACA;border-radius:6px;padding:10px 12px;font-size:12px;color:#991B1B;margin-top:6px;word-break:break-all;font-family:'Noto Sans KR',sans-serif}
+
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-title">디에스오토<span> 매입부</span></div>
+    <div class="sb-logo-sub">매입부 1회차</div>
+  </div>
+  <div class="sb-sync" id="sync-status">● 대기중</div>
+
+  <div class="sb-section">메뉴</div>
+  <ul class="sb-menu">
+    <li><a class="on" onclick="goTab('overview',this)">
+      <svg class="ico" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      전체현황
+    </a></li>
+    <li><a onclick="goTab('ingo',this)">
+      <svg class="ico" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v10M4 7l4 4 4-4M2 13h12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      입고등록
+      <span class="sb-badge mint" id="sb-ingo-cnt">0</span>
+    </a></li>
+    <li><a onclick="goTab('sold',this)">
+      <svg class="ico" viewBox="0 0 16 16" fill="currentColor"><path d="M2 8l4 4 8-8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      판매완료
+      <span class="sb-badge mint" id="sb-sold-cnt">0</span>
+    </a></li>
+    <li><a onclick="goTab('overflow',this)">
+      <svg class="ico" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2v5l3 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      기준가초과
+      <span class="sb-badge" id="sb-over-cnt">0</span>
+    </a></li>
+  </ul>
+
+  <div class="sb-section">담당자</div>
+  <div style="padding:0 8px 8px">
+    <div class="sb-person on" onclick="goPersonTab('박형원 차장',this)">
+      <div class="sb-avatar" style="background:#3B82F6">형</div>
+      <div class="sb-person-info">
+        <div class="sb-person-name">박형원 차장</div>
+        <div class="sb-person-cnt" id="sb-cnt-박형원 차장">0/8대</div>
+      </div>
+    </div>
+    <div class="sb-person" onclick="goPersonTab('한상진 과장',this)">
+      <div class="sb-avatar" style="background:#10B981">상</div>
+      <div class="sb-person-info">
+        <div class="sb-person-name">한상진 과장</div>
+        <div class="sb-person-cnt" id="sb-cnt-한상진 과장">0/27대</div>
+      </div>
+    </div>
+    <div class="sb-person" onclick="goPersonTab('장민준 대리',this)">
+      <div class="sb-avatar" style="background:#F59E0B">민</div>
+      <div class="sb-person-info">
+        <div class="sb-person-name">장민준 대리</div>
+        <div class="sb-person-cnt" id="sb-cnt-장민준 대리">0/27대</div>
+      </div>
+    </div>
+    <div class="sb-person" onclick="goPersonTab('이준혁 사원',this)">
+      <div class="sb-avatar" style="background:#8B5CF6">준</div>
+      <div class="sb-person-info">
+        <div class="sb-person-name">이준혁 사원</div>
+        <div class="sb-person-cnt" id="sb-cnt-이준혁 사원">0/27대</div>
+      </div>
+    </div>
+    <div class="sb-person" onclick="goPersonTab('정세영 사원',this)">
+      <div class="sb-avatar" style="background:#EF4444">세</div>
+      <div class="sb-person-info">
+        <div class="sb-person-name">정세영 사원</div>
+        <div class="sb-person-cnt" id="sb-cnt-정세영 사원">0/27대</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-tabs">
+      <button class="ttab on" onclick="goTab('overview',this)">전체현황</button>
+      <button class="ttab" onclick="goTab('ingo',this)">입고등록</button>
+      <button class="ttab" onclick="goTab('sold',this)">판매완료</button>
+    </div>
+    <div class="topbar-right">
+      <span class="tb-date" id="hdr-date"></span>
+      <span class="tb-dday">D-<span id="dday"></span></span>
+      <button class="tb-btn" onclick="loadFromSheets()">↻ 새로고침</button>
+      <button class="tb-btn btn-danger" onclick="resetAll()">초기화</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── 전체현황 ── -->
+    <div class="pane on" id="pane-overview">
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#EFF6FF">📦</div>
+            <span class="kpi-trend neu" id="s-pct-badge">0%</span>
+          </div>
+          <div class="kpi-val" id="s-done">0<span>대</span></div>
+          <div class="kpi-lbl">전체 매입 / 목표 90대</div>
+          <div class="kpi-bar"><div class="kpi-fill" id="s-bar" style="width:0%;background:#3B82F6"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#F0FDF4">✅</div>
+            <span class="kpi-trend up" id="s-sold-pct-badge">0%</span>
+          </div>
+          <div class="kpi-val" id="s-sold">0<span>대</span></div>
+          <div class="kpi-lbl">판매완료</div>
+          <div class="kpi-bar"><div class="kpi-fill" id="s-sold-bar" style="width:0%;background:#10B981"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#FFFBEB">🎯</div>
+            <span class="kpi-trend neu">잔여</span>
+          </div>
+          <div class="kpi-val" id="s-remain">90<span>대</span></div>
+          <div class="kpi-lbl" id="s-rsub">목표까지 남은 수량</div>
+          <div class="kpi-bar"><div class="kpi-fill" id="s-rbar" style="width:100%;background:#F59E0B"></div></div>
+        </div>
+        <div class="kpi" onclick="document.getElementById('pane-overview').querySelector('.overflow-panel').scrollIntoView({behavior:'smooth'})">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#FEF2F2">🚨</div>
+            <span class="kpi-trend down" id="s-sm-badge">0건</span>
+          </div>
+          <div class="kpi-val" id="s-sm" style="color:#EF4444">0<span>건</span></div>
+          <div class="kpi-lbl">기준가 초과</div>
+          <div class="kpi-bar"><div class="kpi-fill" id="s-smbar" style="width:0%;background:#EF4444"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#F5F3FF">💰</div>
+            <span class="kpi-trend up">마진</span>
+          </div>
+          <div class="kpi-val" id="s-margin" style="font-size:18px;color:#10B981">-</div>
+          <div class="kpi-lbl">판매완료 기준 예상마진</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <!-- 차종별 진행현황 테이블 -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">차종별 진행현황</span>
+            <span class="panel-sub">입고 기준 자동집계</span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>담당자</th>
+                <th>차종</th>
+                <th>조건</th>
+                <th class="c">기준가</th>
+                <th class="c">목표</th>
+                <th class="c">매입</th>
+                <th>달성률</th>
+                <th class="c">기준가초과</th>
+                <th class="c">판매</th>
+              </tr></thead>
+              <tbody id="ov-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid" style="grid-template-columns:1fr 280px">
+        <!-- 담당자별 달성률 -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">담당자별 달성률</span>
+          </div>
+          <div class="assignee-list" id="ov-assignees"></div>
+        </div>
+
+        <!-- 오른쪽 패널 -->
+        <div class="right-panels">
+          <!-- 기준가 초과 -->
+          <div class="overflow-panel panel">
+            <div class="panel-hdr" style="background:#FEF2F2">
+              <span class="panel-title" style="color:#991B1B">🚨 기준가 초과</span>
+              <span class="panel-sub" id="ov-over-cnt">0건</span>
+            </div>
+            <div id="overflow-list">
+              <div style="padding:14px;font-size:11px;color:var(--muted);text-align:center">없음</div>
+            </div>
+          </div>
+          <!-- 최근 로그 -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-title">최근 활동</span>
+              <span class="panel-sub" id="log-cnt">0건</span>
+            </div>
+            <div class="log-list" id="log-list">
+              <div style="padding:14px;font-size:11px;color:var(--muted);text-align:center">내역 없음</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 입고등록 ── -->
+    <div class="pane" id="pane-ingo">
+      <!-- 상단 KPI -->
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#EFF6FF">📦</div></div>
+          <div class="kpi-val" id="ig-total">0<span>대</span></div>
+          <div class="kpi-lbl">총 입고</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#F0FDF4">✅</div></div>
+          <div class="kpi-val" id="ig-sold-cnt">0<span>대</span></div>
+          <div class="kpi-lbl" id="ig-spct">판매율 0%</div>
+          <div class="kpi-bar"><div class="kpi-fill" id="ig-sbar" style="width:0%;background:#10B981"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#FFFBEB">💳</div></div>
+          <div class="kpi-val" id="ig-buy-sum" style="font-size:16px">0<span>원</span></div>
+          <div class="kpi-lbl">총 매입금액</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#F0FDF4">💰</div></div>
+          <div class="kpi-val" id="ig-margin-sum" style="font-size:16px">0<span>원</span></div>
+          <div class="kpi-lbl">예상 마진</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#FEF2F2">🚨</div></div>
+          <div class="kpi-val" id="ig-sm-cnt" style="color:#EF4444">0<span>건</span></div>
+          <div class="kpi-lbl">기준가 초과</div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="mini-box">
+          <div class="mini-hdr">차종별 현황</div>
+          <div id="ingo-car-summary"></div>
+        </div>
+        <div class="mini-box">
+          <div class="mini-hdr">거래처별 현황</div>
+          <div id="ingo-src-summary"></div>
+        </div>
+      </div>
+
+      <!-- 입고 폼 -->
+      <div class="form-card">
+        <div class="form-card-hdr">
+          <span class="form-card-title">차량 입고 등록</span>
+        </div>
+        <div class="form-body">
+          <div class="fg"><label>담당자</label>
+            <select class="fi" id="ig-a" onchange="igUpdateCars()">
+              <option>박형원 차장</option><option>한상진 과장</option><option>장민준 대리</option><option>이준혁 사원</option><option>정세영 사원</option>
+            </select>
+          </div>
+          <div class="fg"><label>차종</label><select class="fi" id="ig-car" onchange="igCheckPrice()" style="width:110px"></select></div>
+          <div class="fg">
+            <label>차번호</label>
+            <input class="fi" id="ig-no" placeholder="12가3456" style="width:100px" oninput="igCheckDup(this)">
+            <div class="dup-warn" id="ig-dup-warn">⚠ 중복 차번호</div>
+          </div>
+          <div class="fg"><label>거래처</label><input class="fi" id="ig-src" placeholder="거래처명" style="width:90px"></div>
+          <div class="fg"><label>입고일</label><input class="fi" id="ig-date" type="date" style="width:130px"></div>
+          <div class="fg"><label>매입금액(원)</label><input class="fi" id="ig-buy-v" type="text" placeholder="0" style="width:110px" oninput="fmtLive(this);igCheckPrice()" onchange="igPreview()"></div>
+          <div class="fg"><label>지출(원)</label><input class="fi" id="ig-exp" type="text" placeholder="0" style="width:90px" oninput="fmtLive(this)" onchange="igPreview()"></div>
+          <div class="fg"><label>판매금액(원)</label><input class="fi" id="ig-sell" type="text" placeholder="미판매시 공란" style="width:110px" oninput="fmtLive(this)" onchange="igPreview()"></div>
+          <div class="fg"><label>예상마진</label><div id="ig-prev" style="padding:6px 0;font-weight:700;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);min-width:80px">-</div></div>
+          <div class="fg"><label>판매완료</label><div style="padding:8px 0"><input type="checkbox" id="ig-sold-chk"></div></div>
+          <div class="fg"><label>&nbsp;</label><button class="btn btn-primary" onclick="addIngo()">등록</button></div>
+        </div>
+        <div class="price-warn" id="ig-price-warn">🚨 기준가 초과 — 아래 사유를 반드시 입력해야 등록됩니다</div>
+        <div class="reason-wrap" id="ig-reason-wrap">
+          <label>초과 매입 사유 (필수)</label>
+          <textarea class="fi" id="ig-reason" rows="2" placeholder="기준가 초과 사유를 입력해주세요..." style="width:100%"></textarea>
+        </div>
+      </div>
+
+      <!-- 목록 -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <span class="panel-title">입고 차량 목록</span>
+          <div class="filters">
+            <select id="ig-fa" onchange="renderIngo()"><option value="">전체 담당자</option><option>박형원 차장</option><option>한상진 과장</option><option>장민준 대리</option><option>이준혁 사원</option><option>정세영 사원</option></select>
+            <select id="ig-fs" onchange="renderIngo()"><option value="">전체</option><option value="n">미판매</option><option value="y">판매완료</option></select>
+            <select id="ig-fc" onchange="renderIngo()"><option value="">전체 차종</option></select>
+            <input id="ig-fq" placeholder="차번호/거래처 검색" oninput="renderIngo()" style="width:140px">
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th>담당자</th><th>차종</th><th>차번호</th><th>거래처</th>
+            <th class="r">매입금액</th><th class="r">지출</th><th class="r">원가</th>
+            <th class="r">판매금액</th><th class="r">예상마진</th>
+            <th class="c">판매</th><th>입고일</th><th class="c">경과일</th>
+            <th class="c">수정/삭제</th>
+          </tr></thead>
+          <tbody id="ig-tbody"></tbody>
+        </table></div>
+        <div style="padding:20px;text-align:center;font-size:12px;color:var(--muted);display:none" id="ig-empty">등록된 차량이 없습니다</div>
+      </div>
+    </div>
+
+    <!-- ── 판매완료 ── -->
+    <div class="pane" id="pane-sold">
+      <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#F0FDF4">✅</div></div>
+          <div class="kpi-val" id="sold-total-cnt">0<span>대</span></div>
+          <div class="kpi-lbl">판매 완료</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#EFF6FF">💳</div></div>
+          <div class="kpi-val" id="sold-total-cost" style="font-size:16px">-</div>
+          <div class="kpi-lbl">총 원가</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#FFFBEB">💵</div></div>
+          <div class="kpi-val" id="sold-total-sell" style="font-size:16px">-</div>
+          <div class="kpi-lbl">총 판매금액</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><div class="kpi-icon" style="background:#F0FDF4">💰</div></div>
+          <div class="kpi-val" id="sold-total-margin" style="font-size:16px;color:#10B981">-</div>
+          <div class="kpi-lbl">총 마진 / 대당 평균</div>
+          <div class="kpi-bar"><div class="kpi-fill" id="sold-margin-bar" style="width:0%;background:#10B981"></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <span class="panel-title">판매 완료 차량</span>
+          <div class="filters">
+            <select id="sold-fa" onchange="renderSold()"><option value="">전체 담당자</option><option>박형원 차장</option><option>한상진 과장</option><option>장민준 대리</option><option>이준혁 사원</option><option>정세영 사원</option></select>
+            <input id="sold-fq" placeholder="차번호/차종 검색" oninput="renderSold()" style="width:140px">
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th>담당자</th><th>차종</th><th>차번호</th><th>거래처</th>
+            <th class="r">매입금액</th><th class="r">지출</th><th class="r">원가</th>
+            <th class="r">판매금액</th><th class="r">마진</th>
+            <th>판매자</th><th>입고일</th><th class="c">수정</th>
+          </tr></thead>
+          <tbody id="sold-tbody"></tbody>
+        </table></div>
+        <div style="padding:20px;text-align:center;font-size:12px;color:var(--muted);display:none" id="sold-empty">판매 완료된 차량이 없습니다</div>
+      </div>
+    </div>
+
+    <!-- ── 기준가초과 ── -->
+    <div class="pane" id="pane-overflow">
+      <div class="panel">
+        <div class="panel-hdr" style="background:#FEF2F2">
+          <span class="panel-title" style="color:#991B1B">🚨 기준가 초과 차량</span>
+          <span class="panel-sub" id="ov-page-cnt">0건</span>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr>
+            <th>담당자</th><th>차종</th><th>차번호</th><th>거래처</th>
+            <th class="r">기준가</th><th class="r">매입금액</th><th class="r">초과금액</th>
+            <th>초과 사유</th><th>입고일</th><th class="c">상세</th>
+          </tr></thead>
+          <tbody id="overflow-tbody"></tbody>
+        </table></div>
+        <div style="padding:20px;text-align:center;font-size:12px;color:var(--muted);display:none" id="overflow-empty">기준가 초과 차량이 없습니다</div>
+      </div>
+    </div>
+
+    <!-- ── 담당자 탭들 ── -->
+    <div class="pane" id="pane-p_박형원 차장"></div>
+    <div class="pane" id="pane-p_한상진 과장"></div>
+    <div class="pane" id="pane-p_장민준 대리"></div>
+    <div class="pane" id="pane-p_이준혁 사원"></div>
+    <div class="pane" id="pane-p_정세영 사원"></div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ── 수정 모달 ── -->
+<div class="modal-bg" id="edit-modal-bg" onclick="closeEditModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">차량 정보 수정</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-id">
+      <div class="modal-row">
+        <div class="mfg"><label>담당자</label><select id="m-a" onchange="mUpdateCars()"><option>박형원 차장</option><option>한상진 과장</option><option>장민준 대리</option><option>이준혁 사원</option><option>정세영 사원</option></select></div>
+        <div class="mfg"><label>차종</label><select id="m-car"></select></div>
+      </div>
+      <div class="modal-row">
+        <div class="mfg"><label>차번호</label><input id="m-no" placeholder="12가3456"></div>
+        <div class="mfg"><label>거래처</label><input id="m-src" placeholder="거래처명"></div>
+      </div>
+      <div class="modal-row">
+        <div class="mfg"><label>입고일</label><input id="m-date" type="date"></div>
+        <div class="mfg"><label>판매자</label><input id="m-seller" placeholder="판매자 이름"></div>
+      </div>
+      <div class="modal-row">
+        <div class="mfg"><label>매입금액(원)</label><input id="m-buy" type="text" oninput="fmtLive(this);mPreview()" placeholder="0"></div>
+        <div class="mfg"><label>지출(원)</label><input id="m-exp" type="text" oninput="fmtLive(this);mPreview()" placeholder="0"></div>
+      </div>
+      <div class="modal-row">
+        <div class="mfg"><label>판매금액(원)</label><input id="m-sell" type="text" oninput="fmtLive(this);mPreview()" placeholder="0"></div>
+        <div class="mfg" style="justify-content:flex-end"><div class="sold-row"><input type="checkbox" id="m-sold"><label for="m-sold">판매 완료</label></div></div>
+      </div>
+      <div class="modal-margin">
+        <div style="font-size:12px;color:var(--muted)">예상 마진</div>
+        <div id="m-preview" style="font-size:18px;font-weight:900;font-family:'DM Mono',monospace">-</div>
+      </div>
+      <div id="m-sm-warn" style="display:none;background:#FEE2E2;border-left:3px solid #EF4444;padding:8px 12px;font-size:12px;color:#991B1B;font-weight:700;border-radius:4px">🚨 기준가 초과 차량입니다</div>
+      <div id="m-memo-wrap" class="mfg" style="display:none">
+        <label>초과 매입 사유 (필수)</label>
+        <textarea id="m-memo" rows="3" class="fi" placeholder="초과 매입 사유를 입력해주세요" style="width:100%;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveEditModal()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 상세 모달 ── -->
+<div class="modal-bg" id="detail-modal-bg" onclick="closeDetailModal(event)">
+  <div class="detail-modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="detail-title">차량 상세</div>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div class="detail-section" id="detail-info"></div>
+    <div style="padding:14px 20px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.3px">메모 / 기타사항</div>
+      <textarea id="detail-memo" rows="4" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical" placeholder="메모를 입력하세요..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeDetailModal()">닫기</button>
+      <button class="btn btn-primary" onclick="saveDetailMemo()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwiyIXT7Efvkc4phTmjJUd2f15D-JYHtVnFIilNmRfoiWlSgSTcreJFIk2sYjzzH-RL/exec';
+const TOTAL_TARGET = 100;
+
+const ASSIGNEES = {
+  '한상진 과장':{cls:'bdg-han',   color:'#1A5E36',fill:'#38A169',avatar:'상',bg:'#38A169'},
+  '장민준 대리':{cls:'bdg-jang',  color:'#C05621',fill:'#ED8936',avatar:'민',bg:'#ED8936'},
+  '이준혁 사원':{cls:'bdg-lee',   color:'#6B46C1',fill:'#9F7AEA',avatar:'준',bg:'#9F7AEA'},
+  '정세영 사원':{cls:'bdg-jung',  color:'#9B2335',fill:'#E53E3E',avatar:'세',bg:'#E53E3E'},
+  '박형원 차장':{cls:'bdg-hyeong',color:'#1E40AF',fill:'#3B82F6',avatar:'형',bg:'#3B82F6'},
+};
+
+const CARS = [
+  {id:0,  a:'한상진 과장', car:'아반떼 AD',   cond:'16~18년/7~16만km/등급무관',      target:15, max:830},
+  {id:1,  a:'한상진 과장', car:'스파크',       cond:'16~18년/7~15만km/LT이상',        target:10, max:330},
+  {id:2,  a:'장민준 대리', car:'레이',         cond:'15~16년/5~15만km/트렌디이상',    target:7,  max:400},
+  {id:3,  a:'장민준 대리', car:'더뉴레이',     cond:'20년~/5~15만km',                 target:13, max:950},
+  {id:4,  a:'장민준 대리', car:'LF소나타',     cond:'15~16년/16만km이하/모던이상',    target:5,  max:800},
+  {id:5,  a:'장민준 대리', car:'스타렉스',     cond:'18만km이하/3밴·5밴',             target:2,  max:500},
+  {id:6,  a:'이준혁 사원', car:'G80',          cond:'1세대/16만km이하/2천만미만',     target:5,  max:1350},
+  {id:7,  a:'이준혁 사원', car:'QM6',          cond:'20년~/11만km이하/LE이상',        target:10, max:1100},
+  {id:8,  a:'이준혁 사원', car:'티볼리',       cond:'16~18년/5~15만km/등급무관',      target:5,  max:500},
+  {id:9,  a:'정세영 사원', car:'(DN8)소나타',  cond:'20년~/10만km미만/모던이상',      target:5,  max:1400},
+  {id:10, a:'정세영 사원', car:'그랜저 IG',    cond:'17~18년/7~15만km/검정위주',      target:5,  max:1300},
+  {id:11, a:'정세영 사원', car:'모닝',         cond:'18년/5~11만km/디럭스이상',       target:5,  max:600},
+  {id:12, a:'정세영 사원', car:'베리뉴티볼리', cond:'19년~/7~15만km/등급무관',        target:5,  max:1000},
+  {id:13, a:'박형원 차장', car:'캐스퍼',       cond:'21년~/3만km이상/인스퍼레이션↑', target:5,  max:1400},
+  {id:14, a:'박형원 차장', car:'올뉴카니발',   cond:'15~17년/7~15만km/디젤9인승',    target:3,  max:1050},
+];
+
+let ingoList=[], logs=[], saveTimer=null, isSaving=false, detailId=null;
+const FIELDS=['id','a','carId','carName','no','src','buyPrice','expense','sellPrice','sold','date','ts','memo','seller','reason'];
+
+function ingoToRow(r){ return FIELDS.map(f=>f==='sold'?(r[f]?1:0):(r[f]??'')); }
+function rowToIngo(row){
+  const r={}; FIELDS.forEach((f,i)=>{r[f]=row[i]??'';});
+  r.sold=r.sold===1||r.sold===true||r.sold==='1'||r.sold==='TRUE';
+  ['buyPrice','expense','sellPrice','carId','ts','id'].forEach(f=>r[f]=Number(r[f])||0);
+  if(!r.a||!ASSIGNEES[r.a]) r.a='박형원';
+  return r;
+}
+
+async function loadFromSheets(){
+  showStatus('⏳ 동기화 중...');
+  try{
+    const [ir,lr]=await Promise.all([fetch(GAS_URL+'?action=getIngo'),fetch(GAS_URL+'?action=getLogs')]);
+    const id=await ir.json(), ld=await lr.json();
+    const ni=(id||[]).filter(r=>r[0]||r[0]===0).map(rowToIngo);
+    if(ni.length>0){ingoList=ni;localStorage.setItem('ds_ingo_cache',JSON.stringify(ingoList));}
+    else ingoList=JSON.parse(localStorage.getItem('ds_ingo_cache')||'[]');
+    const nl=(ld||[]).filter(r=>r[0]).map(r=>({time:r[0]||'',text:r[1]||''}));
+    if(nl.length>0){logs=nl;localStorage.setItem('ds_logs_cache',JSON.stringify(logs));}
+    else logs=JSON.parse(localStorage.getItem('ds_logs_cache')||'[]');
+    showStatus('● 동기화됨');
+    setTimeout(()=>showStatus('● 온라인'),2000);
+  }catch(e){
+    ingoList=JSON.parse(localStorage.getItem('ds_ingo_cache')||'[]');
+    logs=JSON.parse(localStorage.getItem('ds_logs_cache')||'[]');
+    showStatus('● 오프라인');
+  }
+  renderAll();
+}
+
+async function saveToSheets(){
+  if(isSaving)return; isSaving=true;
+  showStatus('💾 저장 중...');
+  localStorage.setItem('ds_ingo_cache',JSON.stringify(ingoList));
+  localStorage.setItem('ds_logs_cache',JSON.stringify(logs));
+  try{
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'saveIngo',data:ingoList.map(ingoToRow)})});
+    if(logs.length>0) await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'saveLogs',data:logs.slice(0,50).map(l=>[l.time,l.text])})});
+    showStatus('✅ 저장됨');
+    setTimeout(()=>showStatus('● 온라인'),2000);
+  }catch(e){showStatus('❌ 저장 실패');}
+  isSaving=false;
+}
+
+function save(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToSheets,800);}
+function showStatus(t){const el=document.getElementById('sync-status');if(el)el.textContent=t;}
+function fmt(n){if(n==null||n==='')return '-';return (Number(n)||0).toLocaleString('ko-KR');}
+function parseV(el){return parseInt((el.value||'').replace(/,/g,''))||0;}
+function fmtLive(el){const r=el.value.replace(/,/g,'');if(!r){el.value='';return;}const n=parseInt(r)||0;if(n>0)el.value=n.toLocaleString('ko-KR');}
+function nowStr(){return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}
+function dateStr(){return new Date().toISOString().slice(0,10);}
+function isSold(r){return r.sold===true||r.sold===1||r.sold==='1'||r.sold==='TRUE';}
+function isSangmae(r){const c=CARS.find(x=>x.id===r.carId);return c?.max&&r.buyPrice>c.max*10000;}
+function getDone(id){return ingoList.filter(r=>r.carId===id).length;}
+function getSold(id){return ingoList.filter(r=>r.carId===id&&isSold(r)).length;}
+function getColor(pct){if(pct>=100)return '#10B981';if(pct>=60)return '#3B82F6';if(pct>=30)return '#F59E0B';return '#EF4444';}
+function daysSince(ts){if(!ts)return '-';const d=Math.floor((Date.now()-ts)/(864e5));return d===0?'오늘':d+'일';}
+function dayColor(ts){if(!ts)return '#94A3B8';const d=Math.floor((Date.now()-ts)/(864e5));if(d>=30)return '#EF4444';if(d>=15)return '#F59E0B';if(d>=7)return '#3B82F6';return '#10B981';}
+function dayBg(ts){if(!ts)return '#F1F5F9';const d=Math.floor((Date.now()-ts)/(864e5));if(d>=30)return '#FEE2E2';if(d>=15)return '#FEF3C7';if(d>=7)return '#DBEAFE';return '#D1FAE5';}
+function carOpts(a,selId){return CARS.filter(c=>c.a===a).map(c=>`<option value="${c.id}"${c.id===selId?' selected':''}>${c.car}</option>`).join('');}
+
+// TAB
+function goTab(name,el){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ttab,.sb-menu li a').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pane-'+name).classList.add('on');
+  if(el) el.classList.add('on');
+  if(name==='sold') renderSold();
+  if(name==='ingo') renderIngo();
+  if(name==='overflow') renderOverflow();
+}
+
+function renderOverflow(){
+  const smList=ingoList.filter(isSangmae);
+  const tbody=document.getElementById('overflow-tbody');
+  const empty=document.getElementById('overflow-empty');
+  document.getElementById('ov-page-cnt').textContent=smList.length+'건';
+  tbody.innerHTML='';
+  empty.style.display=smList.length?'none':'block';
+  smList.forEach(r=>{
+    const info=ASSIGNEES[r.a]||ASSIGNEES['박형원'];
+    const car=CARS.find(c=>c.id===r.carId);
+    const over=r.buyPrice-(car?.max*10000||0);
+    const tr=document.createElement('tr');
+    tr.style.background='#FFF5F5';
+    tr.innerHTML=`
+      <td><span class="bdg ${info.cls}">${r.a}</span></td>
+      <td style="font-weight:600">${r.carName}</td>
+      <td><span class="carno-link" onclick="openDetailModal(${r.id})">${r.no}</span></td>
+      <td style="color:var(--muted)">${r.src||'-'}</td>
+      <td class="r num">${car?.max?car.max.toLocaleString()+'만':'-'}</td>
+      <td class="r num">${fmt(r.buyPrice)}원</td>
+      <td class="r" style="color:#EF4444;font-weight:700;font-family:'DM Mono',monospace">+${fmt(Math.round(over/10000))}만</td>
+      <td style="max-width:200px;white-space:normal;font-size:11px;color:#991B1B">${r.reason||r.memo||'<span style="color:var(--muted)">-</span>'}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.date||'-'}</td>
+      <td class="c"><button class="btn btn-sm btn-edit" onclick="openDetailModal(${r.id})">보기</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+function goPersonTab(name,sbEl){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-person').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pane-p_'+name).classList.add('on');
+  if(sbEl) sbEl.classList.add('on');
+  renderPersonal(name);
+}
+
+// OVERVIEW
+function renderOverview(){
+  const done=ingoList.length, sold=ingoList.filter(isSold).length;
+  const pct=Math.round(done/TOTAL_TARGET*100);
+  const soldPct=done>0?Math.round(sold/done*100):0;
+  const smList=ingoList.filter(isSangmae);
+  const totalM=ingoList.filter(isSold).reduce((s,r)=>s+(r.sellPrice-(r.buyPrice+r.expense)),0);
+
+  document.getElementById('s-done').innerHTML=`${done}<span>대</span>`;
+  document.getElementById('s-pct-badge').textContent=pct+'%';
+  document.getElementById('s-bar').style.width=Math.min(100,pct)+'%';
+  document.getElementById('s-sold').innerHTML=`${sold}<span>대</span>`;
+  document.getElementById('s-sold-pct-badge').textContent=soldPct+'%';
+  document.getElementById('s-sold-bar').style.width=soldPct+'%';
+  document.getElementById('s-remain').innerHTML=`${Math.max(0,TOTAL_TARGET-done)}<span>대</span>`;
+  document.getElementById('s-rsub').textContent=pct>=100?'🎉 목표 달성!':`목표까지 ${TOTAL_TARGET-done}대 남음`;
+  document.getElementById('s-rbar').style.width=Math.max(0,100-pct)+'%';
+  document.getElementById('s-sm').innerHTML=`${smList.length}<span>건</span>`;
+  document.getElementById('s-sm-badge').textContent=smList.length+'건';
+  document.getElementById('s-smbar').style.width=Math.min(100,smList.length*10)+'%';
+  const mEl=document.getElementById('s-margin');
+  mEl.innerHTML=totalM!==0?`${totalM>=0?'+':''}${fmt(totalM)}<span>원</span>`:`-`;
+  mEl.style.color=totalM>=0?'#10B981':'#EF4444';
+
+  // 사이드바 배지
+  document.getElementById('sb-ingo-cnt').textContent=done;
+  document.getElementById('sb-sold-cnt').textContent=sold;
+  document.getElementById('sb-over-cnt').textContent=smList.length;
+
+  // 차종별 진행현황 테이블
+  const tbody=document.getElementById('ov-tbody');
+  tbody.innerHTML=CARS.map(c=>{
+    const d=getDone(c.id), s=getSold(c.id);
+    const p=Math.min(100,Math.round(d/c.target*100)), col=getColor(p);
+    const info=ASSIGNEES[c.a];
+    const smCnt=ingoList.filter(r=>r.carId===c.id&&isSangmae(r)).length;
+    return `<tr>
+      <td><span class="bdg ${info.cls}">${c.a}</span></td>
+      <td style="font-weight:700">${c.car}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:200px;white-space:normal">${c.cond}</td>
+      <td class="c"><span class="bdg bdg-blue">${c.max?c.max.toLocaleString()+'만':'-'}</span></td>
+      <td class="c num" style="font-weight:700">${c.target}</td>
+      <td class="c num" style="font-weight:900;color:var(--text)">${d}</td>
+      <td style="min-width:100px">
+        <div class="prog-bar"><div class="prog-fill" style="width:${p}%;background:${col}"></div></div>
+        <div class="prog-txt" style="color:${col}">${p}%</div>
+      </td>
+      <td class="c">${smCnt>0?`<span class="bdg bdg-red">${smCnt}건</span>`:'<span style="color:var(--muted2)">-</span>'}</td>
+      <td class="c num" style="color:#8B5CF6;font-weight:700">${s>0?s+'대':'<span style="color:var(--muted2)">-</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  // 담당자 달성률
+  const aEl=document.getElementById('ov-assignees');
+  aEl.innerHTML=Object.keys(ASSIGNEES).map(name=>{
+    const info=ASSIGNEES[name];
+    const rows=CARS.filter(r=>r.a===name);
+    const target=rows.reduce((s,r)=>s+r.target,0);
+    const done=rows.reduce((s,r)=>s+getDone(r.id),0);
+    const pct=target>0?Math.min(100,Math.round(done/target*100)):0;
+    const col=getColor(pct);
+    document.getElementById('sb-cnt-'+name).textContent=`${done}/${target}대`;
+    return `<div class="ass-item" onclick="goPersonTab('${name}',null)">
+      <div class="ass-avatar" style="background:${info.bg}">${info.avatar}</div>
+      <div class="ass-info">
+        <div class="ass-name">${name}</div>
+        <div class="ass-bar"><div class="ass-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>
+      <div class="ass-right">
+        <div class="ass-cnt">${done}<span style="font-size:10px;color:var(--muted);font-weight:400">/${target}</span></div>
+        <div class="ass-pct" style="color:${col}">${pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 기준가 초과 목록
+  const ol=document.getElementById('overflow-list');
+  document.getElementById('ov-over-cnt').textContent=smList.length+'건';
+  ol.innerHTML=smList.length?smList.map(r=>{
+    const car=CARS.find(c=>c.id===r.carId);
+    const over=r.buyPrice-(car.max*10000);
+    return `<div class="overflow-item" onclick="openDetailModal(${r.id})">
+      <div>
+        <div class="ov-no">${r.no}</div>
+        <div class="ov-info">${r.carName} · ${r.a}</div>
+      </div>
+      <div class="ov-over">+${fmt(Math.round(over/10000))}만</div>
+    </div>`;
+  }).join(''):'<div style="padding:14px;font-size:11px;color:var(--muted);text-align:center">초과 차량 없음</div>';
+
+  // 로그
+  const logEl=document.getElementById('log-list');
+  document.getElementById('log-cnt').textContent=logs.length+'건';
+  logEl.innerHTML=logs.length?logs.slice(0,20).map(l=>`<div class="log-item"><span class="log-time">${l.time}</span><span>${l.text}</span></div>`).join(''):'<div style="padding:14px;font-size:11px;color:var(--muted);text-align:center">내역 없음</div>';
+}
+
+// INGO
+function igUpdateCars(){
+  const a=document.getElementById('ig-a').value;
+  document.getElementById('ig-car').innerHTML=CARS.filter(r=>r.a===a).map(r=>`<option value="${r.id}">${r.car}</option>`).join('');
+  igBuildCarFilter(); igCheckPrice();
+}
+function igBuildCarFilter(){
+  const sel=document.getElementById('ig-fc'); if(!sel)return;
+  sel.innerHTML='<option value="">전체 차종</option>'+[...new Set(CARS.map(c=>c.car))].map(c=>`<option>${c}</option>`).join('');
+}
+function igCheckPrice(){
+  const carId=parseInt(document.getElementById('ig-car').value);
+  const car=CARS.find(c=>c.id===carId);
+  const buy=parseV(document.getElementById('ig-buy-v'));
+  const over=car?.max&&buy>car.max*10000;
+  document.getElementById('ig-price-warn').classList.toggle('on',!!over);
+  document.getElementById('ig-reason-wrap').classList.toggle('on',!!over);
+}
+function igCheckDup(inp){
+  const val=inp.value.trim();
+  document.getElementById('ig-dup-warn').classList.toggle('on',!!(val&&ingoList.some(r=>r.no===val)));
+}
+function igPreview(){
+  const buy=parseV(document.getElementById('ig-buy-v'));
+  const exp=parseV(document.getElementById('ig-exp'));
+  const sell=parseV(document.getElementById('ig-sell'));
+  const el=document.getElementById('ig-prev');
+  if(!sell){el.textContent='-';el.style.color='var(--muted)';return;}
+  const m=sell-(buy+exp);
+  el.textContent=(m>=0?'+':'')+fmt(m)+'원';
+  el.style.color=m>=0?'#10B981':'#EF4444';
+}
+function addIngo(){
+  const a=document.getElementById('ig-a').value;
+  const carId=parseInt(document.getElementById('ig-car').value);
+  const car=CARS.find(r=>r.id===carId);
+  const no=document.getElementById('ig-no').value.trim();
+  const src=document.getElementById('ig-src').value.trim();
+  const date=document.getElementById('ig-date').value||dateStr();
+  const buyPrice=parseV(document.getElementById('ig-buy-v'));
+  const expense=parseV(document.getElementById('ig-exp'));
+  const sellPrice=parseV(document.getElementById('ig-sell'));
+  const sold=document.getElementById('ig-sold-chk').checked;
+  if(!no){alert('차번호를 입력해주세요.');return;}
+  if(ingoList.some(r=>r.no===no)){alert(`이미 등록된 차번호입니다: ${no}`);return;}
+  const over=car?.max&&buyPrice>car.max*10000;
+  const reason=document.getElementById('ig-reason').value.trim();
+  if(over&&!reason){alert('기준가 초과 사유를 입력해주세요.');document.getElementById('ig-reason').focus();return;}
+  const rec={id:Date.now(),a,carId,carName:car?.car||'',no,src,buyPrice,expense,sellPrice,sold,date,ts:new Date(date).getTime()||Date.now(),memo:'',seller:'',reason:over?reason:''};
+  ingoList.unshift(rec);
+  logs.unshift({time:nowStr(),text:`${a} · ${car?.car} 등록 (${no})${over?' [기준가초과]':''}`});
+  if(logs.length>100) logs=logs.slice(0,100);
+  ['ig-no','ig-src','ig-buy-v','ig-exp','ig-sell','ig-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ig-date').value=dateStr();
+  document.getElementById('ig-sold-chk').checked=false;
+  document.getElementById('ig-prev').textContent='-';
+  document.getElementById('ig-price-warn').classList.remove('on');
+  document.getElementById('ig-reason-wrap').classList.remove('on');
+  document.getElementById('ig-dup-warn').classList.remove('on');
+  renderAll(); save();
+}
+
+function renderIngoSummary(){
+  const total=ingoList.length, sold=ingoList.filter(isSold).length;
+  const totalBuy=ingoList.reduce((s,r)=>s+(r.buyPrice+r.expense),0);
+  const totalM=ingoList.filter(isSold).reduce((s,r)=>s+(r.sellPrice-(r.buyPrice+r.expense)),0);
+  const smCnt=ingoList.filter(isSangmae).length;
+  const sp=total>0?Math.round(sold/total*100):0;
+  document.getElementById('ig-total').innerHTML=`${total}<span>대</span>`;
+  document.getElementById('ig-sold-cnt').innerHTML=`${sold}<span>대</span>`;
+  document.getElementById('ig-spct').textContent=`판매율 ${sp}%`;
+  document.getElementById('ig-sbar').style.width=sp+'%';
+  document.getElementById('ig-buy-sum').innerHTML=`${fmt(totalBuy)}<span>원</span>`;
+  const mEl=document.getElementById('ig-margin-sum');
+  mEl.innerHTML=`${totalM>=0?'+':''}${fmt(totalM)}<span>원</span>`;
+  mEl.style.color=totalM>=0?'#10B981':'#EF4444';
+  document.getElementById('ig-sm-cnt').innerHTML=`${smCnt}<span>건</span>`;
+
+  const carMap={},srcMap={};
+  ingoList.forEach(r=>{
+    carMap[r.carName]=(carMap[r.carName]||0)+1;
+    if(r.src) srcMap[r.src]=(srcMap[r.src]||0)+1;
+  });
+  document.getElementById('ingo-car-summary').innerHTML=Object.entries(carMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
+    const c=CARS.find(x=>x.car===k);
+    return `<div class="mini-row"><span>${k}</span><span class="mini-val">${v}/${c?.target||'?'}대</span></div>`;
+  }).join('')||'<div class="mini-row" style="color:var(--muted)">없음</div>';
+  document.getElementById('ingo-src-summary').innerHTML=Object.entries(srcMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
+    `<div class="mini-row"><span>${k}</span><span class="mini-val">${v}대</span></div>`
+  ).join('')||'<div class="mini-row" style="color:var(--muted)">없음</div>';
+}
+
+function renderIngo(){
+  renderIngoSummary();
+  const fa=document.getElementById('ig-fa')?.value||'';
+  const fs=document.getElementById('ig-fs')?.value||'';
+  const fc=document.getElementById('ig-fc')?.value||'';
+  const fq=(document.getElementById('ig-fq')?.value||'').toLowerCase();
+  let list=ingoList.filter(r=>{
+    if(fa&&r.a!==fa)return false;
+    if(fs==='y'&&!isSold(r))return false;
+    if(fs==='n'&&isSold(r))return false;
+    if(fc&&r.carName!==fc)return false;
+    if(fq&&!r.no.toLowerCase().includes(fq)&&!(r.src||'').toLowerCase().includes(fq)&&!r.carName.toLowerCase().includes(fq))return false;
+    return true;
+  });
+  const tbody=document.getElementById('ig-tbody'), empty=document.getElementById('ig-empty');
+  tbody.innerHTML='';
+  empty.style.display=list.length?'none':'block';
+  list.forEach(r=>{
+    const info=ASSIGNEES[r.a]||ASSIGNEES['박형원'];
+    const cost=(r.buyPrice||0)+(r.expense||0), margin=(r.sellPrice||0)-cost;
+    const sm=isSangmae(r), sold=isSold(r);
+    const dc=dayColor(r.ts), db=dayBg(r.ts);
+    const tr=document.createElement('tr');
+    if(sold) tr.style.opacity='0.55';
+    if(sm&&!sold) tr.style.background='#FFF5F5';
+    tr.innerHTML=`
+      <td><span class="bdg ${info.cls}">${r.a}</span></td>
+      <td style="font-weight:600">${r.carName}${sm?'<span class="bdg bdg-red" style="margin-left:4px">초과</span>':''}</td>
+      <td class="c"><span class="carno-link" onclick="openDetailModal(${r.id})">${r.no||'-'}</span></td>
+      <td style="color:var(--muted)">${r.src||'-'}</td>
+      <td class="r num">${fmt(r.buyPrice)}원</td>
+      <td class="r num">${fmt(r.expense)}원</td>
+      <td class="r num" style="font-weight:700">${fmt(cost)}원</td>
+      <td class="r num">${r.sellPrice?fmt(r.sellPrice)+'원':'-'}</td>
+      <td class="r ${margin>=0?'pos':'neg'}">${r.sellPrice?(margin>=0?'+':'')+fmt(margin)+'원':'-'}</td>
+      <td class="c"><input type="checkbox" ${sold?'checked':''} data-sold="${r.id}"></td>
+      <td style="font-size:11px;color:var(--muted)">${r.date||'-'}</td>
+      <td class="c"><span class="day-bdg" style="background:${db};color:${dc}">${daysSince(r.ts)}</span></td>
+      <td class="c" style="white-space:nowrap">
+        <button class="btn btn-sm btn-edit" onclick="openEditModal(${r.id})" style="margin-right:4px">수정</button>
+        <button class="btn btn-sm btn-danger" onclick="delIngo(${r.id})">삭제</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderSold(){
+  const fa=document.getElementById('sold-fa')?.value||'';
+  const fq=(document.getElementById('sold-fq')?.value||'').toLowerCase();
+  let list=ingoList.filter(r=>{
+    if(!isSold(r))return false;
+    if(fa&&r.a!==fa)return false;
+    if(fq&&!r.no.toLowerCase().includes(fq)&&!r.carName.toLowerCase().includes(fq))return false;
+    return true;
+  });
+
+  // KPI 계산
+  const totalCost=list.reduce((s,r)=>s+(r.buyPrice||0)+(r.expense||0),0);
+  const totalSell=list.reduce((s,r)=>s+(r.sellPrice||0),0);
+  const totalMargin=list.reduce((s,r)=>s+(r.sellPrice||0)-((r.buyPrice||0)+(r.expense||0)),0);
+  const avgMargin=list.length>0?Math.round(totalMargin/list.length):0;
+  const el1=document.getElementById('sold-total-cnt');
+  const el2=document.getElementById('sold-total-cost');
+  const el3=document.getElementById('sold-total-sell');
+  const el4=document.getElementById('sold-total-margin');
+  if(el1) el1.innerHTML=`${list.length}<span>대</span>`;
+  if(el2) el2.innerHTML=`${fmt(totalCost)}<span>원</span>`;
+  if(el3) el3.innerHTML=`${fmt(totalSell)}<span>원</span>`;
+  if(el4){
+    el4.innerHTML=`${totalMargin>=0?'+':''}${fmt(totalMargin)}<span>원</span><div style="font-size:10px;font-weight:400;color:var(--muted);margin-top:2px">대당 ${totalMargin>=0?'+':''}${fmt(avgMargin)}원</div>`;
+    el4.style.color=totalMargin>=0?'#10B981':'#EF4444';
+  }
+
+  const tbody=document.getElementById('sold-tbody'), empty=document.getElementById('sold-empty');
+  tbody.innerHTML=''; empty.style.display=list.length?'none':'block';
+  list.forEach(r=>{
+    const info=ASSIGNEES[r.a]||ASSIGNEES['박형원'];
+    const cost=(r.buyPrice||0)+(r.expense||0), margin=(r.sellPrice||0)-cost;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="bdg ${info.cls}">${r.a}</span></td>
+      <td style="font-weight:600">${r.carName}</td>
+      <td><span class="carno-link" onclick="openDetailModal(${r.id})">${r.no}</span></td>
+      <td style="color:var(--muted)">${r.src||'-'}</td>
+      <td class="r num">${fmt(r.buyPrice)}원</td>
+      <td class="r num">${fmt(r.expense)}원</td>
+      <td class="r num" style="font-weight:700">${fmt(cost)}원</td>
+      <td class="r num">${r.sellPrice?fmt(r.sellPrice)+'원':'-'}</td>
+      <td class="r ${margin>=0?'pos':'neg'}">${(margin>=0?'+':'')+fmt(margin)}원</td>
+      <td><input type="text" value="${r.seller||''}" placeholder="판매자" data-seller="${r.id}" style="padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;width:90px;outline:none;font-family:'Noto Sans KR',sans-serif"></td>
+      <td style="font-size:11px;color:var(--muted)">${r.date||'-'}</td>
+      <td class="c"><button class="btn btn-sm btn-edit" onclick="openEditModal(${r.id})">수정</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPersonal(name){
+  const el=document.getElementById('pane-p_'+name); if(!el)return;
+  const info=ASSIGNEES[name]; if(!info)return;
+  const myCars=CARS.filter(r=>r.a===name);
+  const target=myCars.reduce((s,r)=>s+r.target,0);
+  const done=myCars.reduce((s,r)=>s+getDone(r.id),0);
+  const myRecs=ingoList.filter(r=>r.a===name);
+  const soldRecs=myRecs.filter(isSold);
+  const totalBuy=myRecs.reduce((s,r)=>s+(r.buyPrice||0),0);
+  const totalExp=myRecs.reduce((s,r)=>s+(r.expense||0),0);
+  const totalSell=soldRecs.reduce((s,r)=>s+(r.sellPrice||0),0);
+  const totalM=soldRecs.reduce((s,r)=>s+(r.sellPrice||0)-(r.buyPrice||0)-(r.expense||0),0);
+  const pct=target>0?Math.round(done/target*100):0;
+  const srcMap={};
+  myRecs.forEach(r=>{if(r.src)srcMap[r.src]=(srcMap[r.src]||0)+1;});
+
+  el.innerHTML=`<div>
+    <div class="p-top">
+      <div class="p-avatar-big" style="background:${info.bg}">${info.avatar}</div>
+      <div>
+        <div style="font-size:18px;font-weight:900;color:${info.bg}">${name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">담당 ${myCars.length}개 차종 · 목표 ${target}대 · 달성률 ${pct}%</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:${info.bg}">${done}</div>
+        <div style="font-size:11px;color:var(--muted)">/${target}대 · 판매 ${soldRecs.length}대</div>
+      </div>
+    </div>
+    <div class="p-kpi-row">
+      <div class="kpi" style="padding:12px"><div class="kpi-lbl">총 매입금액</div><div class="kpi-val" style="font-size:16px">${fmt(totalBuy)}<span>원</span></div></div>
+      <div class="kpi" style="padding:12px"><div class="kpi-lbl">총 지출</div><div class="kpi-val" style="font-size:16px">${fmt(totalExp)}<span>원</span></div></div>
+      <div class="kpi" style="padding:12px"><div class="kpi-lbl">판매금액 합계</div><div class="kpi-val" style="font-size:16px">${fmt(totalSell)}<span>원</span></div></div>
+      <div class="kpi" style="padding:12px"><div class="kpi-lbl">예상 마진</div><div class="kpi-val" style="font-size:16px;color:${totalM>=0?'#10B981':'#EF4444'}">${totalM>=0?'+':''}${fmt(totalM)}<span>원</span></div></div>
+    </div>
+    <div class="two-col">
+      <div class="mini-box"><div class="mini-hdr">차종별 현황</div>
+        ${myCars.map(c=>{const d=getDone(c.id);return`<div class="mini-row"><span>${c.car}</span><span class="mini-val">${d}/${c.target}대 (${Math.round(d/c.target*100)}%)</span></div>`;}).join('')}
+      </div>
+      <div class="mini-box"><div class="mini-hdr">거래처별 현황</div>
+        ${Object.entries(srcMap).length?Object.entries(srcMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="mini-row"><span>${k}</span><span class="mini-val">${v}대</span></div>`).join(''):'<div class="mini-row" style="color:var(--muted)">없음</div>'}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-title">매입 차량 목록</span><span class="panel-sub">${myRecs.length}대</span></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>차종</th><th>차번호</th><th>거래처</th><th class="r">매입금액</th><th class="r">지출</th><th class="r">원가</th><th class="r">판매금액</th><th class="r">예상마진</th><th class="c">경과일</th><th class="c">판매</th><th class="c">수정/삭제</th></tr></thead>
+        <tbody>
+        ${myRecs.length===0?`<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">입고등록된 차량이 없습니다</td></tr>`:
+          myRecs.map(r=>{
+            const cost=(r.buyPrice||0)+(r.expense||0),margin=(r.sellPrice||0)-cost;
+            const sm=isSangmae(r),sold=isSold(r);
+            const dc=dayColor(r.ts),db=dayBg(r.ts);
+            return`<tr ${sold?'style="opacity:0.55"':''} ${sm&&!sold?'style="background:#FFF5F5"':''}>
+              <td style="font-weight:600">${r.carName}${sm?'<span class="bdg bdg-red" style="margin-left:4px">초과</span>':''}</td>
+              <td><span class="carno-link" onclick="openDetailModal(${r.id})">${r.no}</span></td>
+              <td style="color:var(--muted)">${r.src||'-'}</td>
+              <td class="r num">${fmt(r.buyPrice)}원</td>
+              <td class="r num">${fmt(r.expense)}원</td>
+              <td class="r num" style="font-weight:700">${fmt(cost)}원</td>
+              <td class="r num">${r.sellPrice?fmt(r.sellPrice)+'원':'-'}</td>
+              <td class="r ${margin>=0?'pos':'neg'}">${r.sellPrice?(margin>=0?'+':'')+fmt(margin)+'원':'-'}</td>
+              <td class="c"><span class="day-bdg" style="background:${db};color:${dc}">${daysSince(r.ts)}</span></td>
+              <td class="c"><input type="checkbox" ${sold?'checked':''} data-sold="${r.id}"></td>
+              <td class="c" style="white-space:nowrap">
+                <button class="btn btn-sm btn-edit" onclick="openEditModal(${r.id})" style="margin-right:4px">수정</button>
+                <button class="btn btn-sm btn-danger" onclick="delIngo(${r.id})">삭제</button>
+              </td></tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+// 수정 모달
+function mUpdateCars(){
+  const a=document.getElementById('m-a').value;
+  document.getElementById('m-car').innerHTML=carOpts(a,parseInt(document.getElementById('m-car').value)||null);
+  mPreview();
+}
+function mPreview(){
+  const buy=parseV(document.getElementById('m-buy')),exp=parseV(document.getElementById('m-exp')),sell=parseV(document.getElementById('m-sell'));
+  const el=document.getElementById('m-preview');
+  if(!sell){el.textContent='-';el.style.color='var(--muted)';}
+  else{const m=sell-(buy+exp);el.textContent=(m>=0?'+':'')+fmt(m)+'원';el.style.color=m>=0?'#10B981':'#EF4444';}
+  const car=CARS.find(c=>c.id===parseInt(document.getElementById('m-car').value));
+  const sm=car?.max&&buy>car.max*10000;
+  document.getElementById('m-sm-warn').style.display=sm?'block':'none';
+  document.getElementById('m-memo-wrap').style.display=sm?'block':'none';
+}
+function openEditModal(id){
+  const r=ingoList.find(r=>r.id===id); if(!r)return;
+  document.getElementById('m-id').value=id;
+  document.getElementById('m-a').value=r.a;
+  document.getElementById('m-car').innerHTML=carOpts(r.a,r.carId);
+  document.getElementById('m-no').value=r.no||'';
+  document.getElementById('m-src').value=r.src||'';
+  document.getElementById('m-date').value=r.date||'';
+  document.getElementById('m-seller').value=r.seller||'';
+  document.getElementById('m-buy').value=r.buyPrice?fmt(r.buyPrice):'';
+  document.getElementById('m-exp').value=r.expense?fmt(r.expense):'';
+  document.getElementById('m-sell').value=r.sellPrice?fmt(r.sellPrice):'';
+  document.getElementById('m-sold').checked=isSold(r);
+  document.getElementById('m-memo').value=r.memo||'';
+  mPreview();
+  document.getElementById('edit-modal-bg').classList.add('on');
+}
+function closeEditModal(e){
+  if(e&&e.target!==document.getElementById('edit-modal-bg'))return;
+  document.getElementById('edit-modal-bg').classList.remove('on');
+}
+function saveEditModal(){
+  const id=parseInt(document.getElementById('m-id').value);
+  const r=ingoList.find(r=>r.id===id); if(!r)return;
+  const a=document.getElementById('m-a').value;
+  const carId=parseInt(document.getElementById('m-car').value);
+  const car=CARS.find(c=>c.id===carId);
+  r.a=a;r.carId=carId;r.carName=car?.car||r.carName;
+  r.no=document.getElementById('m-no').value.trim();
+  r.src=document.getElementById('m-src').value.trim();
+  r.seller=document.getElementById('m-seller').value.trim();
+  r.buyPrice=parseV(document.getElementById('m-buy'));
+  r.expense=parseV(document.getElementById('m-exp'));
+  r.sellPrice=parseV(document.getElementById('m-sell'));
+  r.sold=document.getElementById('m-sold').checked;
+  const memoVal=document.getElementById('m-memo').value.trim();
+  const sm=car?.max&&r.buyPrice>car.max*10000;
+  if(sm&&!memoVal&&!r.reason){alert('기준가 초과 사유를 입력해주세요.');return;}
+  r.memo=memoVal; if(sm&&memoVal)r.reason=memoVal;
+  const nd=document.getElementById('m-date').value;
+  if(nd){r.date=nd;r.ts=new Date(nd).getTime();}
+  logs.unshift({time:nowStr(),text:`${r.a} · ${r.carName} 수정 (${r.no})`});
+  renderAll(); save();
+  document.getElementById('edit-modal-bg').classList.remove('on');
+}
+
+// 상세 모달
+function openDetailModal(id){
+  const r=ingoList.find(r=>r.id===id); if(!r)return;
+  detailId=id;
+  const cost=(r.buyPrice||0)+(r.expense||0),margin=(r.sellPrice||0)-cost;
+  const info=ASSIGNEES[r.a]||ASSIGNEES['박형원'];
+  const sm=isSangmae(r),car=CARS.find(c=>c.id===r.carId);
+  document.getElementById('detail-title').textContent=`${r.carName} · ${r.no}`;
+  document.getElementById('detail-info').innerHTML=`
+    <div class="detail-row"><div class="detail-lbl">담당자</div><div><span class="bdg ${info.cls}">${r.a}</span></div></div>
+    <div class="detail-row"><div class="detail-lbl">차종</div><div class="detail-val">${r.carName}${sm?'<span class="bdg bdg-red" style="margin-left:6px">기준가 초과</span>':''}</div></div>
+    <div class="detail-row"><div class="detail-lbl">차번호</div><div class="detail-val">${r.no}</div></div>
+    <div class="detail-row"><div class="detail-lbl">거래처</div><div class="detail-val">${r.src||'-'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">입고일</div><div class="detail-val">${r.date||'-'} (${daysSince(r.ts)})</div></div>
+    <div class="detail-row"><div class="detail-lbl">매입금액</div><div class="detail-val">${fmt(r.buyPrice)}원</div></div>
+    <div class="detail-row"><div class="detail-lbl">지출</div><div class="detail-val">${fmt(r.expense)}원</div></div>
+    <div class="detail-row"><div class="detail-lbl">원가</div><div class="detail-val" style="font-weight:900">${fmt(cost)}원</div></div>
+    ${car?.max?`<div class="detail-row"><div class="detail-lbl">기준가</div><div class="detail-val">${car.max.toLocaleString()}만원</div></div>`:''}
+    ${sm?`<div class="detail-row"><div class="detail-lbl">초과금액</div><div class="detail-val" style="color:#EF4444">+${fmt(Math.round((r.buyPrice-car.max*10000)/10000))}만원</div></div>`:''}
+    <div class="detail-row"><div class="detail-lbl">판매금액</div><div class="detail-val">${r.sellPrice?fmt(r.sellPrice)+'원':'-'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">예상마진</div><div class="detail-val ${margin>=0?'pos':'neg'}">${r.sellPrice?(margin>=0?'+':'')+fmt(margin)+'원':'-'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">판매여부</div><div class="detail-val">${isSold(r)?'✅ 판매완료':'미판매'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">판매자</div><div class="detail-val">${r.seller||'-'}</div></div>
+    ${sm&&(r.reason||r.memo)?`<div style="margin-top:8px"><div style="font-size:11px;font-weight:700;color:#991B1B;margin-bottom:4px">🚨 기준가 초과 사유</div><div class="reason-box">${r.reason||r.memo}</div></div>`:''}
+  `;
+  document.getElementById('detail-memo').value=r.memo||'';
+  document.getElementById('detail-modal-bg').classList.add('on');
+}
+function closeDetailModal(e){
+  if(e&&e.target!==document.getElementById('detail-modal-bg'))return;
+  document.getElementById('detail-modal-bg').classList.remove('on');
+  detailId=null;
+}
+function saveDetailMemo(){
+  if(!detailId)return;
+  const r=ingoList.find(r=>r.id===detailId); if(!r)return;
+  r.memo=document.getElementById('detail-memo').value.trim();
+  save();
+  document.getElementById('detail-modal-bg').classList.remove('on');
+  detailId=null;
+}
+
+function delIngo(id){
+  const numId=Number(id);
+  ingoList=ingoList.filter(r=>Number(r.id)!==numId);
+  const activePer=document.querySelector('.sb-person.on');
+  const activeName=activePer?.querySelector('.sb-person-name')?.textContent;
+  renderAll();
+  if(activeName) renderPersonal(activeName);
+  save();
+}
+
+// 이벤트 위임 (판매체크/판매자만)
+document.addEventListener('change',function(e){
+  if(e.target.dataset.sold){
+    const r=ingoList.find(r=>r.id===parseInt(e.target.dataset.sold));
+    if(r){r.sold=e.target.checked;const tr=e.target.closest('tr');if(tr)tr.style.opacity=r.sold?'0.55':'1';renderOverview();renderIngoSummary();renderSold();save();}
+    return;
+  }
+  if(e.target.dataset.seller){
+    const r=ingoList.find(r=>r.id===parseInt(e.target.dataset.seller));
+    if(r){r.seller=e.target.value.trim();save();}
+    return;
+  }
+});
+
+function renderAll(){renderOverview();renderIngo();renderSold();renderOverflow();}
+function resetAll(){if(!confirm('전체 초기화할까요? 되돌릴 수 없습니다.'))return;ingoList=[];logs=[];renderAll();save();}
+
+function initHeader(){
+  const now=new Date();
+  document.getElementById('hdr-date').textContent=now.toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+  const end=new Date('2025-04-19');
+  const diff=Math.ceil((end-now)/(864e5));
+  document.getElementById('dday').textContent=Math.max(0,diff);
+}
+
+igUpdateCars(); igBuildCarFilter();
+document.getElementById('ig-date').value=dateStr();
+initHeader();
+loadFromSheets();
+</script>
+</body>
+</html>
